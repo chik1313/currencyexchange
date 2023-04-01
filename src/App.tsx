@@ -1,31 +1,44 @@
-import React, {useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import './App.css'
 import Converter from "./ui/Converter";
 import {currencyApi} from "./dal/api";
 
-type ValueType = {
-    r030: number,
-    txt: string,
-    rate: number,
-    cc: string,
-    exchangedate: string
-}
+// type ValueType = {
+//     r030: number,
+//     txt: string,
+//     rate: number,
+//     cc: string,
+//     exchangedate: string
+// }
 function App() {
     const [fromCurrency, setFromCurrency] = useState<string>('UAH')
     const [toCurrency, setToFromCurrency] = useState<string>('USD')
-    const [rates, setRates] = useState<ValueType[]>([])
-    const [fromPrice, setFromPrice] = useState<number>(0)
-    const [toPrice, setToPrice] = useState<number>(0)
+    const [rates, setRates] = useState({})
+    const [exchangeRate,setExchangeRate] = useState<number>(1)
+    const [ammount, setAmount] = useState<number>(0)
+    const [convertedAmount, setConvertedAmount] = useState(0);
+    // const [toPrice, setToPrice] = useState<number>(0)
 
     useEffect(() => {
-        currencyApi.getCourses()
-            .then((res) => {
-                setRates(res.data);
-                console.log(res.data)
-            })
-    }, [])
+        const getExchangeRate = async () => {
+            const response = await currencyApi.getCourses(fromCurrency);
+            setRates(response)
+            console.log(response)
+            const exchangeRate = response.data.rates[toCurrency];
+            setExchangeRate(exchangeRate);
+        };
+        getExchangeRate();
+        setConvertedAmount(ammount * exchangeRate);
+    }, [fromCurrency, toCurrency, ammount, convertedAmount, exchangeRate]);
 
-    const onChangeFromPrice = (value: number) => {
+    const handleChanger = (event: ChangeEvent<HTMLInputElement>) => {
+        const value = +event.currentTarget.value;
+        const newValue = event.currentTarget.name === 'amount' ? value : value / exchangeRate;
+        setAmount(newValue);
+        setConvertedAmount(newValue * exchangeRate);
+    };
+
+    /*const onChangeFromPrice = (value: number) => {
 
         const toCurrencyRate = rates.find(({cc}) => {
             return toCurrency === cc
@@ -40,8 +53,7 @@ function App() {
         }
 
         else if (fromCurrency ===  toCurrency ) {
-            const price = value * 1
-            setToPrice(price)
+            setToPrice(value)
             setFromPrice(value)
             return
         }
@@ -66,36 +78,32 @@ function App() {
             setToPrice(value)
             setFromPrice(price)
             return
-        }else if (fromCurrency ===  toCurrency ) {
-            const price = value * 1
-            setToPrice(price)
-            setFromPrice(value)
-            return
         }
         const toCurrencyRate = rates.find(({cc})=>{
             return toCurrency === cc
         })!.rate
-        const price = ((value * toCurrencyRate) / (value * fromCurrencyRate)) * value
+        const price = (value * toCurrencyRate) / fromCurrencyRate
         setFromPrice(price)
         setToPrice(value)
     };
-
-/*
-    useEffect(() => {
-        onChangeFromPrice(fromPrice)
-    },[fromCurrency,fromPrice]);
-
-    useEffect(() => {
-        onChangeToPrice(toPrice)
-    },[toCurrency,toPrice]);
 */
+
 
     return (
         <div className="converter">
-            <Converter value={fromPrice} currency={fromCurrency} onChangeCurrency={setFromCurrency}
-                       onChangeValue={onChangeFromPrice}/>
-            <Converter value={toPrice}
-                       currency={toCurrency} onChangeCurrency={setToFromCurrency} onChangeValue={onChangeToPrice}/>
+            <Converter value={ammount}
+                       currency={fromCurrency}
+                       onChangeCurrency={setFromCurrency}
+                       handleAmountChange={handleChanger}
+                       name='amount'
+            />
+            <Converter value={convertedAmount}
+                       currency={toCurrency}
+                       onChangeCurrency={setToFromCurrency}
+                       handleAmountChange={handleChanger}
+                       name='convertedAmount'
+            />
+
         </div>
     );
 }

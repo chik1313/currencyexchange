@@ -1,19 +1,20 @@
-import React, {ChangeEvent, useState} from 'react';
+import React, {ChangeEventHandler, useState} from 'react';
 import s from './Converter.module.css'
-import {FormControl, FormHelperText, MenuItem, Select, SelectChangeEvent, TextField} from "@mui/material";
+import {MenuItem, Select, SelectChangeEvent, TextField} from "@mui/material";
+
 export type PropsType = {
     value: number,
     currency:string,
+    name:string|undefined,
     onChangeCurrency: (value: string) => void
-    onChangeValue: (value:number) => void
+    // onChangeValue: (value:number) => void
+    handleAmountChange:ChangeEventHandler<HTMLInputElement>
 }
 export const defaultCurrencies = ["UAH" , "USD" , "EUR"]
 const Converter = (props:PropsType) => {
     const [currency, setCurrency] = useState(props.currency);
 
-
     const handleChange = (event: SelectChangeEvent) => {
-
         setCurrency(event.target.value as string);
     };
 
@@ -24,18 +25,16 @@ const Converter = (props:PropsType) => {
                 label="cur"
                 onChange={handleChange}
             >
-                {defaultCurrencies.map(el =>
-                        <MenuItem color="secondary" value={el} onClick={()=>props.onChangeCurrency(el)}>{el}</MenuItem>
+                {defaultCurrencies.map((el , i )=>
+                        <MenuItem key={i} color="secondary" value={el} onClick={()=>props.onChangeCurrency(el)}>{el}</MenuItem>
                     )}
 
             </Select>
-            <TextField
+            <TextField name={props.name}
                        label="Value"
                        variant="outlined"
                        value={props.value}
-                       onChange={(e)=> {
-                           props.onChangeValue(+e.currentTarget.value)
-                       }}/>
+                       onChange={props.handleAmountChange}/>
 
         </div>
     );
