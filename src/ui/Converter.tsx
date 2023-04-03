@@ -1,16 +1,16 @@
-import React, {useState} from 'react';
+import React, {ChangeEvent, useState} from 'react';
 import s from './Converter.module.css'
 import {MenuItem, Select, SelectChangeEvent, TextField} from "@mui/material";
 
 export type PropsType = {
     value: number,
-    currency:string,
-    name:string|undefined,
+    currency: string,
+    name: string | undefined,
     onChangeCurrency: (value: string) => void
-    handleAmountChange:(value:number , name:string)=> void
+    handleAmountChange: (value: number, name: string) => void
 }
-export const defaultCurrencies = ["UAH" , "USD" , "EUR"]
-const Converter = (props:PropsType) => {
+export const defaultCurrencies = ["UAH", "USD", "EUR"]
+const Converter = (props: PropsType) => {
     const [currency, setCurrency] = useState(props.currency);
 
     const handleChange = (event: SelectChangeEvent) => {
@@ -24,18 +24,23 @@ const Converter = (props:PropsType) => {
                 label="cur"
                 onChange={handleChange}
             >
-                {defaultCurrencies.map((el , i )=>
-                        <MenuItem key={i} color="secondary" value={el} onClick={()=>props.onChangeCurrency(el)}>{el}</MenuItem>
-                    )}
+                {defaultCurrencies.map((el, i) =>
+                    <MenuItem key={i} color="secondary" value={el}
+                              onClick={() => props.onChangeCurrency(el)}>{el}</MenuItem>
+                )}
 
             </Select>
-            <TextField name={props.name}
-                       label="Value"
-                       variant="outlined"
-                       value={props.value}
-                       onChange={(e)=>props.handleAmountChange(
-                           +e.currentTarget.value , e.currentTarget.name )
-                       }/>
+            <TextField
+                name={props.name}
+                label="Value"
+                variant="outlined"
+                type='number'
+                contentEditable={true}
+                suppressContentEditableWarning={true}
+                value={props.value}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => props.handleAmountChange(
+                    e.currentTarget.valueAsNumber, e.currentTarget.name)
+                }/>
 
         </div>
     );
