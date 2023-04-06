@@ -7,9 +7,10 @@ const initialState:CurrencyType = {
 
 export const currencyReducer = (state:CurrencyType = initialState , action:ActionType ):CurrencyType => {
     switch(action.type) {
-        case "CHANGE-CURRENCY": {
-            return action.rates
-        }
+        case "CHANGE-CURRENCY":
+            return {
+                ...state = action.rates
+            }
         default:
             return state
     }
@@ -24,7 +25,9 @@ const currencyExchangeAC = (rates:CurrencyType) => {
 
 export const currencyExchangeTC = (fromCurrency:string) => async (dispatch: Dispatch<ActionType>) => {
     const response = await currencyApi.getCourses(fromCurrency);
+    if(response.status === 200 ) {
     dispatch(currencyExchangeAC(response.data.rates))
+        }
     // console.log(response.data.rates)
     // const exchangeRate = response.data.rates[toCurrency];
     // setExchangeRate(exchangeRate);
